@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Payme QR Scanner</title>
+  <title>Click Pass Scanner</title>
   <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
     * { box-sizing: border-box; }
@@ -143,7 +143,7 @@
 </head>
 <body>
   <div class="container">
-    <img src="static/paymelogo.png" alt="Payme Logo" class="logo">
+    <img src="static/clicklogo.png" alt="Click Logo" class="logo">
     <h2 id="title">Scan Payme GO QR</h2>
 
     <div class="lang-switch">
@@ -153,11 +153,11 @@
 
     <form id="payment-form">
       <input type="number" step="0.01" id="amount" placeholder="Amount (UZS)" required>
-      
+
 
       <!-- Preferred amounts section -->
       <div class="preferred-amounts" style="margin: 10px 0;">
-        
+
         <div>
           <button type="button" onclick="setPreferredAmount(23000)">23000</button>
           <button type="button" onclick="setPreferredAmount(28000)">28000</button>
@@ -186,7 +186,7 @@
 
     const translations = {
       uz: {
-        title: "Payme GO QR kodini skanerlash",
+        title: "Click Pass QR kodini skanerlash",
         amount: "Summani kiriting (UZS)",
         desc: "Izoh",
         gunScanner: "Skaneri resultati",
@@ -202,7 +202,7 @@
         networkError: "❌ Tarmoq xatosi"
       },
       ru: {
-        title: "Сканируйте QR Payme GO",
+        title: "Сканируйте QR Click Pass",
         amount: "Введите сумму (UZS)",
         desc: "Описание",
         gunScanner: "Сканер штрихкода",
