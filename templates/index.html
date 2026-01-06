@@ -1,366 +1,302 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Click Pass Scanner</title>
-  <script src="https://unpkg.com/html5-qrcode"></script>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      background: linear-gradient(to right, #f7f8fc, #e3e6f0);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      min-height: 100vh;
-      overflow: hidden;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click Pass Scanner</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            background: linear-gradient(to right, #f7f8fc, #e3e6f0);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
 
-    .container {
-      background: white;
-      padding: 25px 30px;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-      max-width: 420px;
-      width: 100%;
-      text-align: center;
-      position: relative;
-      z-index: 1;
-    }
+        .container {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+        }
 
-    .logo-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 15px;
-    }
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
 
-    .logo { width: 110px; height: auto; }
+        .logo { width: 110px; height: auto; }
 
-    h2 { margin: 0 0 15px; color: #333; font-size: 1.3rem; }
+        h2 { margin: 0 0 15px; color: #333; font-size: 1.3rem; }
 
-    .lang-switch {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 20px;
-      gap: 10px;
-    }
+        .lang-switch {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
 
-    .lang-switch button {
-      flex: 1;
-      padding: 10px;
-      font-size: 14px;
-      border: 1px solid #ddd;
-      background: #f8f9fa;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
+        .lang-switch button {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            background: #f8f9fa;
+            border-radius: 10px;
+            cursor: pointer;
+        }
 
-    .lang-switch button.active {
-      background: #007bff;
-      color: white;
-      border-color: #007bff;
-    }
+        .lang-switch button.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
 
-    input {
-      width: 100%;
-      padding: 12px;
-      margin: 8px 0;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      font-size: 15px;
-    }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+        }
 
-    #reader {
-      width: 100%;
-      margin: 15px 0;
-      border-radius: 10px;
-      overflow: hidden;
-      background: #fafafa;
-    }
+        #reader {
+            width: 100%;
+            margin: 15px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #fafafa;
+        }
 
-    .action-btn { background: #00b2ff; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; cursor: pointer; margin-top: 10px; font-weight: bold; }
-    .pay-btn { background: #28a745; color: white; width: 100%; padding: 14px; border: none; border-radius: 10px; cursor: pointer; margin-top: 10px; font-weight: bold; font-size: 1.1rem; }
-    
-    button:disabled { background: #ccc !important; cursor: not-allowed; opacity: 0.7; }
+        .action-btn { background: #00b2ff; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; cursor: pointer; margin-top: 10px; font-weight: bold; }
+        .pay-btn { background: #28a745; color: white; width: 100%; padding: 14px; border: none; border-radius: 10px; cursor: pointer; margin-top: 10px; font-weight: bold; font-size: 1.1rem; }
+        
+        button:disabled { background: #ccc !important; cursor: not-allowed; }
 
-    .preferred-amounts { margin: 10px 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
-    .preferred-amounts button { background: #f0f0f0; border: 1px solid #ccc; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
-    .preferred-amounts button:hover { background: #e2e2e2; }
+        .preferred-amounts { margin: 10px 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
+        .preferred-amounts button { background: #f0f0f0; border: 1px solid #ccc; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
 
-    #status { margin-top: 15px; font-size: 14px; color: #555; min-height: 40px; font-weight: 500; }
+        #status { margin-top: 15px; font-size: 14px; color: #555; min-height: 40px; }
 
-    /* Success Animation Overlay */
-    #success-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(255, 255, 255, 0.96);
-      z-index: 100;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .checkmark-circle {
-      width: 100px; height: 100px;
-      border: 5px solid #28a745;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      animation: pulse 1.5s infinite;
-    }
-
-    .checkmark-stem {
-      position: absolute; width: 5px; height: 45px;
-      background-color: #28a745; left: 52px; top: 18px;
-      transform: rotate(45deg); border-radius: 2px;
-      animation: draw-stem 0.4s ease-out forwards;
-    }
-
-    .checkmark-kick {
-      position: absolute; width: 25px; height: 5px;
-      background-color: #28a745; left: 28px; top: 58px;
-      transform: rotate(45deg); border-radius: 2px;
-      animation: draw-kick 0.4s ease-out forwards;
-    }
-
-    @keyframes draw-stem { 0% { height: 0; } 100% { height: 45px; } }
-    @keyframes draw-kick { 0% { width: 0; } 100% { width: 25px; } }
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4); }
-      70% { box-shadow: 0 0 0 20px rgba(40, 167, 69, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
-    }
-
-    body.fade-out { animation: fadeOut 1s forwards; }
-    @keyframes fadeOut { to { opacity: 0; transform: scale(0.98); } }
-  </style>
+        body.fade-out { animation: fadeOut 1s forwards; }
+        @keyframes fadeOut { to { opacity: 0; transform: scale(0.98); } }
+    </style>
 </head>
 <body>
 
-  <div id="success-overlay">
-    <div class="checkmark-circle">
-      <div class="checkmark-kick"></div>
-      <div class="checkmark-stem"></div>
-    </div>
-    <h1 id="success-text" style="color: #28a745; margin-top: 20px;">Muvaffaqiyatli!</h1>
-  </div>
-
-  <div class="container">
+<div class="container">
     <div class="logo-container">
-      <img src="{{ url_for('static', filename='coffeewaylogo.png') }}" alt="Coffee Way" class="logo">
-      <img src="{{ url_for('static', filename='clicklogo.png') }}" alt="Click" class="logo">
+        <img src="static/coffeewaylogo.png" alt="Coffee Way" class="logo">
+        <img src="static/clicklogo.png" alt="Click" class="logo">
     </div>
+
     <h2 id="title">Scan Click Pass QR</h2>
 
     <div class="lang-switch">
-      <button id="btn-uz" onclick="setLanguage('uz')">🇺🇿 O'zbek</button>
-      <button id="btn-ru" onclick="setLanguage('ru')">🇷🇺 Русский</button>
+        <button id="btn-uz" onclick="setLanguage('uz')">🇺🇿 O'zbek</button>
+        <button id="btn-ru" onclick="setLanguage('ru')">🇷🇺 Русский</button>
     </div>
 
     <form id="payment-form" onsubmit="event.preventDefault();">
-      <input type="number" step="0.01" id="amount" placeholder="Amount (UZS)" required>
+        <input type="number" id="amount" placeholder="Amount (UZS)" required>
+        
+        <div class="preferred-amounts">
+            <button type="button" onclick="setPreferredAmount(23000)">23000</button>
+            <button type="button" onclick="setPreferredAmount(28000)">28000</button>
+            <button type="button" onclick="setPreferredAmount(33000)">33000</button>
+            <button type="button" onclick="setPreferredAmount(38000)">38000</button>
+        </div>
 
-      <div class="preferred-amounts">
-        <button type="button" onclick="setPreferredAmount(23000)">23000</button>
-        <button type="button" onclick="setPreferredAmount(28000)">28000</button>
-        <button type="button" onclick="setPreferredAmount(33000)">33000</button>
-        <button type="button" onclick="setPreferredAmount(38000)">38000</button>
-      </div>
+        <input type="text" id="desc" placeholder="Description">
+        <input type="text" id="gun-scanner-input" placeholder="QR Token Result" maxlength="20">
+        
+        <div id="reader"></div>
 
-      <input type="text" id="desc" placeholder="Description">
-      <input type="text" id="gun-scanner-input" placeholder="Token" maxlength="20">
-      
-      <div id="reader"></div>
+        <button type="button" class="pay-btn" onclick="handlePayment()" id="pay-btn">Pay</button>
+        <button type="button" class="action-btn" onclick="startCamera()" id="start-btn">Start Camera</button>
 
-      <button type="button" class="pay-btn" onclick="handlePayment()" id="pay-btn">Pay</button>
-      <button type="button" class="action-btn" onclick="startCamera()" id="start-btn">Start Camera</button>
-
-      <p id="status">Click "Start Camera" to begin scanning.</p>
+        <p id="status">Click "Start Camera" to begin scanning.</p>
     </form>
-  </div>
+</div>
 
-  <script>
+<script>
     let html5QrCode = null;
     let isCameraRunning = false;
     let scanLocked = false; 
     let currentLang = 'uz';
 
     const translations = {
-      uz: {
-        title: "Click Pass QR kodini skanerlash",
-        amount: "Summani kiriting (UZS)",
-        desc: "Izoh",
-        tokenPlaceholder: "Token",
-        start: "Kamerani yoqish",
-        pay: "To‘lash",
-        clickToStart: "📷 QR kodni skanerlash uchun 'Kamerani yoqish' tugmasini bosing.",
-        scannedReady: "✅ QR kod skanerlandi! To‘lov yuborilmoqda...",
-        processing: "⏳ To'lov amalga oshirilmoqda...",
-        success: "✅ To'lov muvaffaqiyatli yakunlandi!",
-        failed: "❌ To'lov amalga oshmadi",
-        enterAmount: "❌ Iltimos, summani kiriting.",
-        noToken: "❌ QR token topilmadi.",
-        overlayText: "Muvaffaqiyatli!"
-      },
-      ru: {
-        title: "Сканируйте QR Click Pass",
-        amount: "Введите сумму (UZS)",
-        desc: "Описание",
-        tokenPlaceholder: "Токен",
-        start: "Запустить камеру",
-        pay: "Оплатить",
-        clickToStart: "📷 Нажмите 'Запустить камеру' для сканирования QR-кода.",
-        scannedReady: "✅ QR код сканирован! Платеж отправляется...",
-        processing: "⏳ Обработка платежа...",
-        success: "✅ Платеж прошел успешно!",
-        failed: "❌ Платеж не выполнен",
-        enterAmount: "❌ Пожалуйста, введите сумму.",
-        noToken: "❌ QR токен не найден.",
-        overlayText: "Успешно!"
-      }
+        uz: {
+            title: "Click Pass QR kodini skanerlash",
+            amount: "Summani kiriting (UZS)",
+            desc: "Izoh",
+            gunScanner: "Skaner natijasi",
+            start: "Kamerani yoqish",
+            pay: "To‘lash",
+            clickToStart: "📷 QR kodni skanerlash uchun 'Kamerani yoqish' tugmasini bosing.",
+            alreadyRunning: "⚠️ Kamera allaqachon ishlayapti.",
+            noCamera: "❌ Kamera topilmadi.",
+            processing: "⏳ To'lov amalga oshirilmoqda...",
+            success: "✅ To'lov muvaffaqiyatli yakunlandi!",
+            failed: "❌ To'lov amalga oshmadi",
+            enterAmount: "❌ Iltimos, summani kiriting.",
+            noToken: "❌ QR token topilmadi.",
+            networkError: "❌ Tarmoq xatosi"
+        },
+        ru: {
+            title: "Сканируйте QR Click Pass",
+            amount: "Введите сумму (UZS)",
+            desc: "Описание",
+            gunScanner: "Результат сканера",
+            start: "Запустить камеру",
+            pay: "Оплатить",
+            clickToStart: "📷 Нажмите 'Запустить камеру' для сканирования QR-кода.",
+            alreadyRunning: "⚠️ Камера уже активна.",
+            noCamera: "❌ Камеры не найдены.",
+            processing: "⏳ Обработка платежа...",
+            success: "✅ Платеж прошел успешно!",
+            failed: "❌ Платеж не выполнен",
+            enterAmount: "❌ Пожалуйста, введите сумму.",
+            noToken: "❌ QR токен не найден.",
+            networkError: "❌ Ошибка сети"
+        }
     };
 
     function setLanguage(lang) {
-      currentLang = lang;
-      const t = translations[lang];
-      document.getElementById('title').innerText = t.title;
-      document.getElementById('amount').placeholder = t.amount;
-      document.getElementById('desc').placeholder = t.desc;
-      document.getElementById('gun-scanner-input').placeholder = t.tokenPlaceholder;
-      document.getElementById('start-btn').innerText = t.start;
-      document.getElementById('pay-btn').innerText = t.pay;
-      document.getElementById('status').innerText = t.clickToStart;
-      document.getElementById('success-text').innerText = t.overlayText;
-      document.getElementById('btn-uz').classList.toggle('active', lang === 'uz');
-      document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
+        currentLang = lang;
+        const t = translations[lang];
+        document.getElementById('title').innerText = t.title;
+        document.getElementById('amount').placeholder = t.amount;
+        document.getElementById('desc').placeholder = t.desc;
+        document.getElementById('gun-scanner-input').placeholder = t.gunScanner;
+        document.getElementById('start-btn').innerText = t.start;
+        document.getElementById('pay-btn').innerText = t.pay;
+        document.getElementById('status').innerText = t.clickToStart;
+        document.getElementById('btn-uz').classList.toggle('active', lang === 'uz');
+        document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
     }
 
     function startCamera() {
-      if (isCameraRunning || scanLocked) return;
-      const status = document.getElementById('status');
-      html5QrCode = new Html5Qrcode("reader");
+        const t = translations[currentLang];
+        const status = document.getElementById('status');
 
-      Html5Qrcode.getCameras().then(devices => {
-        if (!devices || devices.length === 0) {
-          status.innerText = translations[currentLang].noCamera;
-          return;
-        }
-        // Prefer back camera
-        const cameraId = devices.length > 1 ? devices[1].id : devices[0].id;
+        if (isCameraRunning || scanLocked) return;
 
-        html5QrCode.start(
-          cameraId,
-          { fps: 10, qrbox: { width: 250, height: 250 } },
-          (decodedText) => {
-            // Check for 20 character token
-            if (!scanLocked && decodedText.length === 20) {
-              processScanResult(decodedText);
+        html5QrCode = new Html5Qrcode("reader");
+
+        Html5Qrcode.getCameras().then(devices => {
+            if (!devices || devices.length === 0) {
+                status.innerText = t.noCamera;
+                return;
             }
-          }
-        ).then(() => {
-          isCameraRunning = true;
-          status.innerText = "🔍 Scanning...";
-        }).catch(err => {
-          status.innerText = `Error: ${err}`;
+
+            const cameraId = devices.length > 1 ? devices[1].id : devices[0].id;
+
+            html5QrCode.start(
+                cameraId,
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                (decodedText) => {
+                    if (!scanLocked && decodedText.length === 20) {
+                        processScanResult(decodedText);
+                    }
+                }
+            ).then(() => {
+                isCameraRunning = true;
+                status.innerText = "🔍 Scanning...";
+            }).catch(err => {
+                status.innerText = `${t.networkError}: ${err}`;
+            });
         });
-      });
     }
 
     function processScanResult(token) {
-      scanLocked = true; // Lock scanning immediately
-      document.getElementById("gun-scanner-input").value = token;
-      
-      // Stop camera
-      if (html5QrCode) {
-        html5QrCode.stop().then(() => {
-          isCameraRunning = false;
-        }).catch(err => console.error(err));
-      }
+        scanLocked = true; 
+        document.getElementById("gun-scanner-input").value = token;
+        
+        if (html5QrCode) {
+            html5QrCode.stop().then(() => {
+                isCameraRunning = false;
+            }).catch(err => console.error(err));
+        }
 
-      document.getElementById("status").innerText = translations[currentLang].scannedReady;
-      handlePayment(); // Auto trigger payment
-    }
-
-    function showSuccess() {
-      const overlay = document.getElementById('success-overlay');
-      overlay.style.display = 'flex';
-      setTimeout(() => {
-        document.body.classList.add("fade-out");
-        setTimeout(() => location.reload(), 1000);
-      }, 2500);
+        handlePayment();
     }
 
     function handlePayment() {
-      const t = translations[currentLang];
-      const amountVal = document.getElementById("amount").value.trim();
-      const desc = document.getElementById("desc").value.trim();
-      const token = document.getElementById("gun-scanner-input").value.trim();
+        const t = translations[currentLang];
+        const amount = document.getElementById("amount").value.trim();
+        const desc = document.getElementById("desc").value.trim();
+        const token = document.getElementById("gun-scanner-input").value.trim();
 
-      if (!amountVal) {
-        document.getElementById("status").innerText = t.enterAmount;
-        scanLocked = false;
-        return;
-      }
-      if (!token) {
-        document.getElementById("status").innerText = t.noToken;
-        scanLocked = false;
-        return;
-      }
-
-      // Lockdown UI
-      document.getElementById("status").innerText = t.processing;
-      document.getElementById("pay-btn").disabled = true;
-      document.getElementById("start-btn").disabled = true;
-
-      fetch("/pay", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, amount: parseFloat(amountVal), description: desc })
-      })
-      .then(async res => {
-        let data = {};
-        try { data = await res.json(); } catch (e) { }
-
-        if (res.ok && data.status === "success") {
-          showSuccess();
-        } else {
-          document.getElementById("status").innerText = `${t.failed}: ${data.message || "Error"}`;
-          resetUI();
+        if (!amount) {
+            document.getElementById("status").innerText = t.enterAmount;
+            scanLocked = false; 
+            return;
         }
-      })
-      .catch(err => {
-        document.getElementById("status").innerText = `Network Error: ${err.message}`;
-        resetUI();
-      });
+        if (!token) {
+            document.getElementById("status").innerText = t.noToken;
+            scanLocked = false;
+            return;
+        }
+
+        document.getElementById("status").innerText = t.processing;
+        document.getElementById("pay-btn").disabled = true;
+        document.getElementById("start-btn").disabled = true;
+
+        fetch("/pay", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token, amount, description: desc })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                document.getElementById("status").innerText = t.success;
+                setTimeout(() => {
+                    document.body.classList.add("fade-out");
+                    setTimeout(() => { location.reload(); }, 1000);
+                }, 1500);
+            } else {
+                document.getElementById("status").innerText = `${t.failed}: ${data.message || "Error"}`;
+                resetUI();
+            }
+        })
+        .catch(err => {
+            document.getElementById("status").innerText = `${t.networkError}: ${err.message}`;
+            resetUI();
+        });
     }
 
     function resetUI() {
-      scanLocked = false;
-      document.getElementById("pay-btn").disabled = false;
-      document.getElementById("start-btn").disabled = false;
+        scanLocked = false;
+        document.getElementById("pay-btn").disabled = false;
+        document.getElementById("start-btn").disabled = false;
     }
 
     function setPreferredAmount(value) {
-      document.getElementById('amount').value = value;
+        document.getElementById('amount').value = value;
     }
 
-    // Hardware Gun Scanner Listener
-    document.getElementById('gun-scanner-input').addEventListener('input', function() {
-      if (this.value.length === 20 && !scanLocked) {
-        processScanResult(this.value);
-      }
+    document.getElementById('gun-scanner-input').addEventListener('input', function(e) {
+        if (this.value.length === 20 && !scanLocked) {
+            processScanResult(this.value);
+        }
     });
 
     setLanguage('uz');
-  </script>
+</script>
+
 </body>
 </html>
