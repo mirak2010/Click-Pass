@@ -278,57 +278,63 @@
       });
     }
 
-    function handlePayment() {
-      const t = translations[currentLang];
-      const amount = document.getElementById("amount").value.trim();
-      const desc = document.getElementById("desc").value.trim();
-      const token = document.getElementById("gun-scanner-input").value.trim();
+   function handlePayment() {
+  const t = translations[currentLang];
+  const amount = document.getElementById("amount").value.trim();
+  const desc = document.getElementById("desc").value.trim();
+  const token = document.getElementById("gun-scanner-input").value.trim();
 
-      if (!amount) {
-        document.getElementById("status").innerText = t.enterAmount;
-        return;
-      }
+  // Basic frontend validation
+  if (!amount) {
+    document.getElementById("status").innerText = t.enterAmount;
+    return;
+  }
 
-      if (!token) {
-        document.getElementById("status").innerText = "❌ QR token not found.";
-        return;
-      }
+  if (!token) {
+    document.getElementById("status").innerText = "❌ QR token not found.";
+    return;
+  }
 
-      document.getElementById("status").innerText = t.processing;
+  document.getElementById("status").innerText = t.processing;
 
-      fetch("/pay", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, amount, description: desc })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.status === "success") {
-          document.getElementById("status").innerText = t.success;
-          // Fade-out before refreshing
-          setTimeout(() => {
-            document.body.classList.add("fade-out");
-            setTimeout(() => {
-              location.reload();
-            }, 1000); // matches fadeOut animation time
-          }, 1500); // show success for 1.5s before fading out
-        } else {
-          document.getElementById("status").innerText = `${t.failed}: ${JSON.stringify(data.response)}`;
-        }
-      })
-      .catch(err => {
-        document.getElementById("status").innerText = `${t.networkError}: ${err.message}`;
-      });
+  fetch("/pay", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, amount, description: desc })
+  })
+  .then(async res => {
+    // Try to parse JSON safely
+    let data = {};
+    try {
+      data = await res.json();
+    } catch (e) {
+      // Not JSON (network/server issue)
+      throw new Error(`Invalid server response`);
     }
 
-    document.getElementById('gun-scanner-input').addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        handlePayment();
-        this.value = '';
+    if (res.ok) {
+      // HTTP 200
+      if (data.status === "success") {
+        document.getElementById("status").innerText = t.success;
+        setTimeout(() => {
+          document.body.classList.add("fade-out");
+          setTimeout(() => location.reload(), 1000);
+        }, 1500);
+      } else {
+        // Unexpected non-success 200
+        const msg = data.message || JSON.stringify(data);
+        document.getElementById("status").innerText = `${t.failed}: ${msg}`;
       }
-    });
-
+    } else {
+      // HTTP 400, 500, etc.
+      const msg = data.message || JSON.stringify(data) || res.statusText;
+      document.getElementById("status").innerText = `${t.failed}: ${msg}`;
+    }
+  })
+  .catch(err => {
+    document.getElementById("status").innerText = `${t.networkError}: ${err.message}`;
+  });
+}
     function setPreferredAmount(value) {
       document.getElementById('amount').value = value;
     }
