@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, jsonify
 import requests
 import time
 import hashlib
-import os
 
 app = Flask(__name__)
 
@@ -53,13 +52,10 @@ def send_telegram_message(message):
     try:
         response = requests.post(url, json=payload, timeout=10)
         response.raise_for_status()
-        
-        # Check Telegram API response
         result = response.json()
         if not result.get('ok', False):
             print(f"Telegram API error: {result.get('description', 'Unknown error')}")
             return False
-            
         return True
     except requests.exceptions.RequestException as e:
         print(f"Failed to send Telegram message: HTTP {getattr(e.response, 'status_code', 'unknown')} error")
@@ -74,27 +70,25 @@ def index():
 
 @app.route("/pay", methods=["POST"])
 def pay():
-    data = request.json or {}
- 
-    print("RECEIVED DATA:", data)
+    data = request.get_json(force=True, silent=True)
     if not data:
         return jsonify({"status": "error", "message": "No JSON received"}), 400
-    
-    # Validate input
+
     otp_data = data.get("token")
     if not otp_data:
         return jsonify({"status": "error", "message": "Token is required"}), 400
-    
+
     try:
         amount = float(data.get("amount", 0))
         if amount <= 0:
             return jsonify({"status": "error", "message": "Amount must be positive"}), 400
     except (ValueError, TypeError):
         return jsonify({"status": "error", "message": "Invalid amount format"}), 400
-    
+
+    description = data.get("description", "")
     transaction_id = str(int(time.time()))
 
-    # 1. Auth header
+    # Auth header
     timestamp = str(int(time.time()))
     digest = hashlib.sha1((timestamp + CLICK_SECRET_KEY).encode()).hexdigest()
     auth_header = f"{CLICK_MERCHANT_USER_ID}:{digest}:{timestamp}"
@@ -105,7 +99,6 @@ def pay():
         "Auth": auth_header
     }
 
-    # 2. Make payment request
     payload = {
         "service_id": CLICK_SERVICE_ID,
         "otp_data": otp_data,
@@ -114,6 +107,7 @@ def pay():
         "transaction_id": transaction_id
     }
 
+    # 1. Send payment
     try:
         r = requests.post(f"{CLICK_API}/click_pass/payment", json=payload, headers=headers, timeout=10)
         r.raise_for_status()
@@ -124,7 +118,7 @@ def pay():
     if res.get("error_code") != 0:
         return jsonify({"status": "error", "step": "payment", "response": res})
 
-    # 3. Confirm payment if needed
+    # 2. Confirm payment if required
     if res.get("confirm_mode") == 1:
         confirm_payload = {
             "service_id": CLICK_SERVICE_ID,
@@ -139,7 +133,7 @@ def pay():
         except requests.exceptions.RequestException as e:
             return jsonify({"status": "error", "step": "confirm", "message": str(e)})
 
-    # Send Telegram notification for successful payment
+    # 3. Send Telegram notification
     success_message = f"""
 🎉 <b>Payment Successful!</b>
 
@@ -150,11 +144,10 @@ def pay():
 
 ✅ Payment has been processed successfully!
     """
-    
     send_telegram_message(success_message.strip())
-    
+
     return jsonify({"status": "success", "response": res})
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
-
