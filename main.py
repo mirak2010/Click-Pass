@@ -75,6 +75,10 @@ def index():
 @app.route("/pay", methods=["POST"])
 def pay():
     data = request.json or {}
+ 
+    print("RECEIVED DATA:", data)
+    if not data:
+        return jsonify({"status": "error", "message": "No JSON received"}), 400
     
     # Validate input
     otp_data = data.get("token")
