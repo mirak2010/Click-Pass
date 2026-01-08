@@ -1,145 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Click Pass QR Scanner</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click Pass Scanner</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            background: linear-gradient(to right, #f7f8fc, #e3e6f0);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
 
-<script src="https://unpkg.com/html5-qrcode"></script>
+        .container {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+        }
 
-<style>
-* { box-sizing: border-box; }
-body {
-    font-family: 'Segoe UI', sans-serif;
-    margin: 0;
-    background: linear-gradient(to right, #f7f8fc, #e3e6f0);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    min-height: 100vh;
-}
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
 
-.container {
-    background: white;
-    padding: 25px 30px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    max-width: 420px;
-    width: 100%;
-    text-align: center;
-}
+        .logo { width: 110px; height: auto; }
 
-.logo-container {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 15px;
-}
+        h2 { margin: 0 0 15px; color: #333; font-size: 1.3rem; }
 
-.logo { width: 110px; }
+        .lang-switch {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
 
-h2 { margin-bottom: 15px; font-size: 1.3rem; }
+        .lang-switch button {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            background: #f8f9fa;
+            border-radius: 10px;
+            cursor: pointer;
+        }
 
-.lang-switch {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-}
+        .lang-switch button.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
 
-.lang-switch button {
-    flex: 1;
-    padding: 10px;
-    border-radius: 10px;
-    border: 1px solid #ddd;
-    background: #f8f9fa;
-    cursor: pointer;
-}
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+        }
 
-.lang-switch button.active {
-    background: #007bff;
-    color: white;
-}
+        #reader {
+            width: 100%;
+            margin: 15px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #fafafa;
+        }
 
-input {
-    width: 100%;
-    padding: 12px;
-    margin: 8px 0;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-}
+        .action-btn { background: #00b2ff; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; cursor: pointer; margin-top: 10px; font-weight: bold; }
+        .pay-btn { background: #28a745; color: white; width: 100%; padding: 14px; border: none; border-radius: 10px; cursor: pointer; margin-top: 10px; font-weight: bold; font-size: 1.1rem; }
+        
+        button:disabled { background: #ccc !important; cursor: not-allowed; }
 
-#reader {
-    margin: 15px 0;
-    border-radius: 10px;
-    overflow: hidden;
-    background: #fafafa;
-}
+        .preferred-amounts { margin: 10px 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
+        .preferred-amounts button { background: #f0f0f0; border: 1px solid #ccc; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
 
-.preferred-amounts {
-    display: flex;
-    justify-content: center;
-    gap: 5px;
-    margin-bottom: 10px;
-}
+        #status { margin-top: 15px; font-size: 14px; color: #555; min-height: 40px; }
 
-.preferred-amounts button {
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    background: #f0f0f0;
-    cursor: pointer;
-}
-
-.pay-btn {
-    background: #28a745;
-    color: white;
-    width: 100%;
-    padding: 14px;
-    border-radius: 10px;
-    border: none;
-    font-weight: bold;
-    font-size: 1.1rem;
-}
-
-.action-btn {
-    background: #00b2ff;
-    color: white;
-    width: 100%;
-    padding: 12px;
-    border-radius: 10px;
-    border: none;
-    margin-top: 10px;
-    font-weight: bold;
-}
-
-button:disabled {
-    background: #ccc !important;
-    cursor: not-allowed;
-}
-
-#status {
-    margin-top: 15px;
-    min-height: 40px;
-    font-size: 14px;
-}
-
-body.fade-out {
-    animation: fadeOut 1s forwards;
-}
-
-@keyframes fadeOut {
-    to { opacity: 0; transform: scale(0.98); }
-}
-</style>
+        body.fade-out { animation: fadeOut 1s forwards; }
+        @keyframes fadeOut { to { opacity: 0; transform: scale(0.98); } }
+    </style>
 </head>
-
 <body>
 
 <div class="container">
     <div class="logo-container">
-        <img src="static/coffeewaylogo.png" class="logo">
-        <img src="static/clicklogo.png" class="logo">
+        <img src="static/coffeewaylogo.png" alt="Coffee Way" class="logo">
+        <img src="static/clicklogo.png" alt="Click" class="logo">
     </div>
 
     <h2 id="title">Scan Click Pass QR</h2>
@@ -149,141 +109,193 @@ body.fade-out {
         <button id="btn-ru" onclick="setLanguage('ru')">🇷🇺 Русский</button>
     </div>
 
-    <input id="amount" type="number" placeholder="Amount (UZS)">
+    <form id="payment-form" onsubmit="event.preventDefault();">
+        <input type="number" id="amount" placeholder="Amount (UZS)" required>
+        
+        <div class="preferred-amounts">
+            <button type="button" onclick="setPreferredAmount(23000)">23000</button>
+            <button type="button" onclick="setPreferredAmount(28000)">28000</button>
+            <button type="button" onclick="setPreferredAmount(33000)">33000</button>
+            <button type="button" onclick="setPreferredAmount(38000)">38000</button>
+        </div>
 
-    <div class="preferred-amounts">
-        <button onclick="setAmount(23000)">23000</button>
-        <button onclick="setAmount(28000)">28000</button>
-        <button onclick="setAmount(33000)">33000</button>
-        <button onclick="setAmount(38000)">38000</button>
-    </div>
+        <input type="text" id="desc" placeholder="Description">
+        <input type="text" id="gun-scanner-input" placeholder="QR Token Result" maxlength="20">
+        
+        <div id="reader"></div>
 
-    <input id="desc" placeholder="Description">
-    <input id="token" placeholder="QR Token Result" maxlength="20">
+        <button type="button" class="pay-btn" onclick="handlePayment()" id="pay-btn">Pay</button>
+        <button type="button" class="action-btn" onclick="startCamera()" id="start-btn">Start Camera</button>
 
-    <div id="reader"></div>
-
-    <button class="pay-btn" id="payBtn" onclick="pay()">Pay</button>
-    <button class="action-btn" id="startBtn" onclick="startCamera()">Start Camera</button>
-
-    <p id="status"></p>
+        <p id="status">Click "Start Camera" to begin scanning.</p>
+    </form>
 </div>
 
 <script>
-let qr = null;
-let cameraRunning = false;
-let locked = false;
-let lang = 'uz';
+    let html5QrCode = null;
+    let isCameraRunning = false;
+    let scanLocked = false; 
+    let currentLang = 'uz';
 
-const t = {
-    uz: {
-        title: "Click Pass QR kodini skanerlash",
-        start: "Kamerani yoqish",
-        pay: "To‘lash",
-        enterAmount: "❌ Summani kiriting",
-        noToken: "❌ QR token topilmadi",
-        scanning: "🔍 Skanerlanmoqda...",
-        processing: "⏳ To'lov amalga oshirilmoqda...",
-        success: "✅ To'lov muvaffaqiyatli yakunlandi!",
-        failed: "❌ To'lov amalga oshmadi",
-        noCamera: "❌ Kamera topilmadi",
-        clickToStart: "📷 Kamerani yoqing"
-    },
-    ru: {
-        title: "Сканирование QR Click Pass",
-        start: "Запустить камеру",
-        pay: "Оплатить",
-        enterAmount: "❌ Введите сумму",
-        noToken: "❌ QR токен не найден",
-        scanning: "🔍 Сканирование...",
-        processing: "⏳ Обработка платежа...",
-        success: "✅ Платеж прошел успешно!",
-        failed: "❌ Платеж не выполнен",
-        noCamera: "❌ Камера не найдена",
-        clickToStart: "📷 Запустите камеру"
+    const translations = {
+        uz: {
+            title: "Click Pass QR kodini skanerlash",
+            amount: "Summani kiriting (UZS)",
+            desc: "Izoh",
+            gunScanner: "Skaner natijasi",
+            start: "Kamerani yoqish",
+            pay: "To‘lash",
+            clickToStart: "📷 QR kodni skanerlash uchun 'Kamerani yoqish' tugmasini bosing.",
+            alreadyRunning: "⚠️ Kamera allaqachon ishlayapti.",
+            noCamera: "❌ Kamera topilmadi.",
+            processing: "⏳ To'lov amalga oshirilmoqda...",
+            success: "✅ To'lov muvaffaqiyatli yakunlandi!",
+            failed: "❌ To'lov amalga oshmadi",
+            enterAmount: "❌ Iltimos, summani kiriting.",
+            noToken: "❌ QR token topilmadi.",
+            networkError: "❌ Tarmoq xatosi"
+        },
+        ru: {
+            title: "Сканируйте QR Click Pass",
+            amount: "Введите сумму (UZS)",
+            desc: "Описание",
+            gunScanner: "Результат сканера",
+            start: "Запустить камеру",
+            pay: "Оплатить",
+            clickToStart: "📷 Нажмите 'Запустить камеру' для сканирования QR-кода.",
+            alreadyRunning: "⚠️ Камера уже активна.",
+            noCamera: "❌ Камеры не найдены.",
+            processing: "⏳ Обработка платежа...",
+            success: "✅ Платеж прошел успешно!",
+            failed: "❌ Платеж не выполнен",
+            enterAmount: "❌ Пожалуйста, введите сумму.",
+            noToken: "❌ QR токен не найден.",
+            networkError: "❌ Ошибка сети"
+        }
+    };
+
+    function setLanguage(lang) {
+        currentLang = lang;
+        const t = translations[lang];
+        document.getElementById('title').innerText = t.title;
+        document.getElementById('amount').placeholder = t.amount;
+        document.getElementById('desc').placeholder = t.desc;
+        document.getElementById('gun-scanner-input').placeholder = t.gunScanner;
+        document.getElementById('start-btn').innerText = t.start;
+        document.getElementById('pay-btn').innerText = t.pay;
+        document.getElementById('status').innerText = t.clickToStart;
+        document.getElementById('btn-uz').classList.toggle('active', lang === 'uz');
+        document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
     }
-};
 
-function setLanguage(l) {
-    lang = l;
-    document.getElementById('title').innerText = t[l].title;
-    document.getElementById('payBtn').innerText = t[l].pay;
-    document.getElementById('startBtn').innerText = t[l].start;
-    document.getElementById('status').innerText = t[l].clickToStart;
-    btnUz.classList.toggle('active', l === 'uz');
-    btnRu.classList.toggle('active', l === 'ru');
-}
+    function startCamera() {
+        const t = translations[currentLang];
+        const status = document.getElementById('status');
 
-function startCamera() {
-    if (cameraRunning || locked) return;
+        if (isCameraRunning || scanLocked) return;
 
-    qr = new Html5Qrcode("reader");
+        html5QrCode = new Html5Qrcode("reader");
 
-    Html5Qrcode.getCameras().then(devices => {
-        if (!devices.length) {
-            status.innerText = t[lang].noCamera;
+        Html5Qrcode.getCameras().then(devices => {
+            if (!devices || devices.length === 0) {
+                status.innerText = t.noCamera;
+                return;
+            }
+
+            const cameraId = devices.length > 1 ? devices[1].id : devices[0].id;
+
+            html5QrCode.start(
+                cameraId,
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                (decodedText) => {
+                    if (!scanLocked && decodedText.length === 20) {
+                        processScanResult(decodedText);
+                    }
+                }
+            ).then(() => {
+                isCameraRunning = true;
+                status.innerText = "🔍 Scanning...";
+            }).catch(err => {
+                status.innerText = `${t.networkError}: ${err}`;
+            });
+        });
+    }
+
+    function processScanResult(token) {
+        scanLocked = true; 
+        document.getElementById("gun-scanner-input").value = token;
+        
+        if (html5QrCode) {
+            html5QrCode.stop().then(() => {
+                isCameraRunning = false;
+            }).catch(err => console.error(err));
+        }
+
+        handlePayment();
+    }
+
+    function handlePayment() {
+        const t = translations[currentLang];
+        const amount = document.getElementById("amount").value.trim();
+        const desc = document.getElementById("desc").value.trim();
+        const token = document.getElementById("gun-scanner-input").value.trim();
+
+        if (!amount) {
+            document.getElementById("status").innerText = t.enterAmount;
+            scanLocked = false; 
+            return;
+        }
+        if (!token) {
+            document.getElementById("status").innerText = t.noToken;
+            scanLocked = false;
             return;
         }
 
-        qr.start(devices[0].id, { fps: 10, qrbox: 250 }, text => {
-            if (text.length === 20 && !locked) processScan(text);
-        }).then(() => {
-            cameraRunning = true;
-            status.innerText = t[lang].scanning;
-        });
-    });
-}
+        document.getElementById("status").innerText = t.processing;
+        document.getElementById("pay-btn").disabled = true;
+        document.getElementById("start-btn").disabled = true;
 
-function processScan(tokenValue) {
-    locked = true;
-    token.value = tokenValue;
-
-    qr?.stop().then(() => cameraRunning = false);
-    pay();
-}
-
-function pay() {
-    if (!amount.value) { status.innerText = t[lang].enterAmount; locked = false; return; }
-    if (!token.value) { status.innerText = t[lang].noToken; locked = false; return; }
-
-    status.innerText = t[lang].processing;
-    payBtn.disabled = startBtn.disabled = true;
-
-    fetch('/pay', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({
-            token: token.value,
-            amount: amount.value,
-            description: desc.value
+        fetch("/pay", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token, amount, description: desc })
         })
-    })
-    .then(r => r.json())
-    .then(r => {
-        if (r.status === 'success') {
-            status.innerText = t[lang].success;
-            setTimeout(() => {
-                document.body.classList.add('fade-out');
-                setTimeout(() => location.reload(), 1000);
-            }, 1500);
-        } else reset(r.message);
-    })
-    .catch(() => reset());
-}
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                document.getElementById("status").innerText = t.success;
+                setTimeout(() => {
+                    document.body.classList.add("fade-out");
+                    setTimeout(() => { location.reload(); }, 1000);
+                }, 1500);
+            } else {
+                document.getElementById("status").innerText = `${t.failed}: ${data.message || "Error"}`;
+                resetUI();
+            }
+        })
+        .catch(err => {
+            document.getElementById("status").innerText = `${t.networkError}: ${err.message}`;
+            resetUI();
+        });
+    }
 
-function reset(msg) {
-    status.innerText = t[lang].failed + (msg ? `: ${msg}` : '');
-    locked = false;
-    payBtn.disabled = startBtn.disabled = false;
-}
+    function resetUI() {
+        scanLocked = false;
+        document.getElementById("pay-btn").disabled = false;
+        document.getElementById("start-btn").disabled = false;
+    }
 
-function setAmount(v){ amount.value = v; }
+    function setPreferredAmount(value) {
+        document.getElementById('amount').value = value;
+    }
 
-token.addEventListener('input', e => {
-    if (e.target.value.length === 20 && !locked) processScan(e.target.value);
-});
+    document.getElementById('gun-scanner-input').addEventListener('input', function(e) {
+        if (this.value.length === 20 && !scanLocked) {
+            processScanResult(this.value);
+        }
+    });
 
-setLanguage('uz');
+    setLanguage('uz');
 </script>
 
 </body>
