@@ -6,10 +6,10 @@ import hashlib
 app = Flask(__name__)
 
 # CLICK Pass credentials (move to .env for production)
-CLICK_MERCHANT_ID = 15907
-CLICK_SERVICE_ID = 83959
-CLICK_MERCHANT_USER_ID = 65019
-CLICK_SECRET_KEY = 'En80cfmebut4axEJ'
+CLICK_MERCHANT_ID = 36236
+CLICK_SERVICE_ID = 98134
+CLICK_MERCHANT_USER_ID = 80126
+CLICK_SECRET_KEY = '14ne2rbatEeQ'
 
 CLICK_API = "https://api.click.uz/v2/merchant"
 
