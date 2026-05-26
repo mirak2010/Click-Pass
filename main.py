@@ -140,7 +140,12 @@ def pay():
 💰 <b>Amount:</b> {amount:,.0f} UZS
 🆔 <b>Transaction ID:</b> {transaction_id}
 🏪 <b>Merchant:</b> CLICK Payment
-⏰ <b>Time:</b> {time.strftime('%Y-%m-%d %H:%M:%S')}
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+tashkent_time = datetime.now(
+    ZoneInfo("Asia/Tashkent")
+).strftime("%Y-%m-%d %H:%M:%S")
 
 ✅ Payment has been processed successfully!
     """
