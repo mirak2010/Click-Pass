@@ -114,7 +114,7 @@
         
         <div class="preferred-amounts">
             <button type="button" onclick="setPreferredAmount(23000)">23000</button>
-            <button type="button" onclick="setPreferredAmount(28000)">28000</button>
+            <button type="button" onclick="setPreferredAmount(30000)">30000</button>
             <button type="button" onclick="setPreferredAmount(33000)">33000</button>
             <button type="button" onclick="setPreferredAmount(38000)">38000</button>
         </div>
@@ -134,7 +134,7 @@
 <script>
     let html5QrCode = null;
     let isCameraRunning = false;
-    let scanLocked = false; 
+    let scanLocked = false;
     let currentLang = 'uz';
 
     const translations = {
@@ -177,6 +177,7 @@
     function setLanguage(lang) {
         currentLang = lang;
         const t = translations[lang];
+
         document.getElementById('title').innerText = t.title;
         document.getElementById('amount').placeholder = t.amount;
         document.getElementById('desc').placeholder = t.desc;
@@ -184,6 +185,7 @@
         document.getElementById('start-btn').innerText = t.start;
         document.getElementById('pay-btn').innerText = t.pay;
         document.getElementById('status').innerText = t.clickToStart;
+
         document.getElementById('btn-uz').classList.toggle('active', lang === 'uz');
         document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
     }
@@ -192,43 +194,64 @@
         const t = translations[currentLang];
         const status = document.getElementById('status');
 
-        if (isCameraRunning || scanLocked) return;
+        if (isCameraRunning || scanLocked) {
+            status.innerText = t.alreadyRunning;
+            return;
+        }
 
         html5QrCode = new Html5Qrcode("reader");
 
-        Html5Qrcode.getCameras().then(devices => {
-            if (!devices || devices.length === 0) {
-                status.innerText = t.noCamera;
-                return;
-            }
-
-            const cameraId = devices.length > 1 ? devices[1].id : devices[0].id;
-
-            html5QrCode.start(
-                cameraId,
-                { fps: 10, qrbox: { width: 250, height: 250 } },
-                (decodedText) => {
-                    if (!scanLocked && decodedText.length === 20) {
-                        processScanResult(decodedText);
-                    }
+        Html5Qrcode.getCameras()
+            .then(devices => {
+                if (!devices || devices.length === 0) {
+                    status.innerText = t.noCamera;
+                    return;
                 }
-            ).then(() => {
-                isCameraRunning = true;
-                status.innerText = "🔍 Scanning...";
-            }).catch(err => {
+
+                const cameraId = devices.length > 1
+                    ? devices[1].id
+                    : devices[0].id;
+
+                html5QrCode.start(
+                    cameraId,
+                    {
+                        fps: 10,
+                        qrbox: { width: 250, height: 250 }
+                    },
+                    (decodedText) => {
+                        if (!scanLocked) {
+                            processScanResult(decodedText);
+                        }
+                    }
+                )
+                .then(() => {
+                    isCameraRunning = true;
+                    status.innerText = "🔍 Scanning...";
+                })
+                .catch(err => {
+                    status.innerText = `${t.networkError}: ${err}`;
+                });
+            })
+            .catch(err => {
                 status.innerText = `${t.networkError}: ${err}`;
             });
-        });
     }
 
     function processScanResult(token) {
-        scanLocked = true; 
+        if (scanLocked) return;
+
+        scanLocked = true;
+
+        token = token.trim();
+
         document.getElementById("gun-scanner-input").value = token;
-        
-        if (html5QrCode) {
-            html5QrCode.stop().then(() => {
-                isCameraRunning = false;
-            }).catch(err => console.error(err));
+
+        if (html5QrCode && isCameraRunning) {
+            html5QrCode.stop()
+                .then(() => {
+                    isCameraRunning = false;
+                })
+                .catch(err => console.error(err));
         }
 
         handlePayment();
@@ -236,62 +259,105 @@
 
     function handlePayment() {
         const t = translations[currentLang];
+
         const amount = document.getElementById("amount").value.trim();
         const desc = document.getElementById("desc").value.trim();
         const token = document.getElementById("gun-scanner-input").value.trim();
 
         if (!amount) {
             document.getElementById("status").innerText = t.enterAmount;
-            scanLocked = false; 
+            resetUI();
             return;
         }
+
         if (!token) {
             document.getElementById("status").innerText = t.noToken;
-            scanLocked = false;
+            resetUI();
             return;
         }
 
         document.getElementById("status").innerText = t.processing;
+
         document.getElementById("pay-btn").disabled = true;
         document.getElementById("start-btn").disabled = true;
 
         fetch("/pay", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token, amount, description: desc })
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                token,
+                amount,
+                description: desc
+            })
         })
         .then(res => res.json())
         .then(data => {
             if (data.status === "success") {
                 document.getElementById("status").innerText = t.success;
+
                 setTimeout(() => {
                     document.body.classList.add("fade-out");
-                    setTimeout(() => { location.reload(); }, 1000);
+
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+
                 }, 1500);
+
             } else {
-                document.getElementById("status").innerText = `${t.failed}: ${data.message || "Error"}`;
+                document.getElementById("status").innerText =
+                    `${t.failed}: ${data.message || "Error"}`;
+
                 resetUI();
             }
         })
         .catch(err => {
-            document.getElementById("status").innerText = `${t.networkError}: ${err.message}`;
+            document.getElementById("status").innerText =
+                `${t.networkError}: ${err.message}`;
+
             resetUI();
         });
     }
 
     function resetUI() {
         scanLocked = false;
+
         document.getElementById("pay-btn").disabled = false;
         document.getElementById("start-btn").disabled = false;
+
+        document.getElementById("gun-scanner-input").value = "";
     }
 
     function setPreferredAmount(value) {
         document.getElementById('amount').value = value;
     }
 
-    document.getElementById('gun-scanner-input').addEventListener('input', function(e) {
-        if (this.value.length === 20 && !scanLocked) {
-            processScanResult(this.value);
+    // AUTO PAY FROM HARDWARE SCANNER
+    const scannerInput = document.getElementById('gun-scanner-input');
+
+    scannerInput.addEventListener('input', function () {
+        if (scanLocked) return;
+
+        const token = this.value.trim();
+
+        // Auto process when enough characters arrive
+        if (token.length >= 20) {
+            processScanResult(token.substring(0, 20));
+        }
+    });
+
+    // Many scanners automatically press ENTER
+    scannerInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+
+            const token = this.value.trim();
+
+            if (token.length >= 20 && !scanLocked) {
+                processScanResult(token.substring(0, 20));
+            }
         }
     });
 
